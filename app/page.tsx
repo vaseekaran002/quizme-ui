@@ -7,7 +7,7 @@ import { ResultsView } from "@/components/results-view"
 import type { MCQQuestion } from "@/lib/types"
 import { BookOpen } from "lucide-react"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:579530"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api"
 
 type AppView = "upload" | "quiz" | "results"
 
@@ -48,7 +48,7 @@ export default function Home() {
       }
   }, [file])
 
-  const handleGenerate = useCallback(async () => {
+ const handleGenerate = useCallback(async () => {
     if (!file) return
 
     setIsLoading(true)
@@ -56,11 +56,11 @@ export default function Home() {
 
     try {
       const reqBody = {
-      "num_questions": 10,
-      "batch_size": 5
-    }
+        "num_of_questions": 5,
+        "query": ""
+      }
 
-      const response = await fetch(`${API_BASE_URL}/questions/all`, {
+      const response = await fetch(`${API_BASE_URL}/generate-mcq/all`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -72,19 +72,14 @@ export default function Home() {
         throw new Error(`Failed to generate questions (${response.status})`)
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
-      // Normalize response - support both { questions: [...] } and direct array
-      const rawQuestions: MCQQuestion[] = Array.isArray(data) ? data : data.questions
-
-      if (!rawQuestions || rawQuestions.length === 0) {
-        throw new Error("No questions were generated. Try a different PDF.")
-      }
-
-      // Ensure each question has an id
-      const normalized = rawQuestions.map((q, i) => ({
-        ...q,
-        id: q.id ?? i + 1,
+      const normalized: MCQQuestion[] = data.messages.questions.map((q: any, index: number) => ({
+        id: index,
+        question: q.question,
+        options: q.options,
+        correct_answer: q.correct_answer,
+        explanation: q.explanation,
       }))
 
       setQuestions(normalized)

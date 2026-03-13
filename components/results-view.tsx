@@ -18,6 +18,7 @@ export function ResultsView({ questions, answers, onReset }: ResultsViewProps) {
     isCorrect: answers[q.id] === q.correct_answer,
   }))
 
+  console.log("Results:", results, questions, answers)
   const correctCount = results.filter((r) => r.isCorrect).length
   const score = Math.round((correctCount / questions.length) * 100)
 
@@ -58,13 +59,11 @@ export function ResultsView({ questions, answers, onReset }: ResultsViewProps) {
 
         <div className="flex flex-col gap-4">
           {results.map((result, index) => {
-            const userOption = result.options.find(
-              (o) => o.label === result.userAnswer,
-            )
-            const correctOption = result.options.find(
-              (o) => o.label === result.correct_answer,
-            )
-
+            const optionLabels = ["A", "B", "C", "D"];
+            const userIndex = optionLabels.indexOf(result.userAnswer);
+            const correctIndex = optionLabels.indexOf(result.correct_answer);
+            const userOption = userIndex !== -1 ? result.options[userIndex] : undefined;
+            const correctOption = correctIndex !== -1 ? result.options[correctIndex] : undefined;
             return (
               <div
                 key={result.id}
@@ -89,21 +88,23 @@ export function ResultsView({ questions, answers, onReset }: ResultsViewProps) {
                       <div className="flex flex-col gap-1 text-sm">
                         <p className="text-destructive">
                           <span className="font-medium">Your answer:</span>{" "}
-                          {userOption ? `${userOption.label}. ${userOption.text}` : "No answer"}
+                          {userOption !== undefined
+                            ? `${optionLabels[userIndex]}. ${(userOption as Record<string, string>)[optionLabels[userIndex] ]}`
+                            : "No answer"}
                         </p>
                         <p className="text-success">
                           <span className="font-medium">Correct answer:</span>{" "}
-                          {correctOption
-                            ? `${correctOption.label}. ${correctOption.text}`
+                          {correctOption !== undefined
+                            ? `${optionLabels[correctIndex]}. ${(correctOption as Record<string, string>)[optionLabels[correctIndex] ]}`
                             : result.correct_answer}
                         </p>
                       </div>
                     )}
 
-                    {result.isCorrect && correctOption && (
+                    {result.isCorrect && correctOption !== undefined && (
                       <p className="text-sm text-success">
                         <span className="font-medium">Answer:</span>{" "}
-                        {correctOption.label}. {correctOption.text}
+                        {optionLabels[correctIndex]}.  {(correctOption as Record<string, string>)[optionLabels[correctIndex] ]}
                       </p>
                     )}
 
@@ -115,7 +116,7 @@ export function ResultsView({ questions, answers, onReset }: ResultsViewProps) {
                   </div>
                 </div>
               </div>
-            )
+            );
           })}
         </div>
       </div>

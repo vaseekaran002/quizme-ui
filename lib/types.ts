@@ -1,7 +1,4 @@
-export interface MCQOption {
-  label: string
-  text: string
-}
+export type MCQOption = { A: string } | { B: string } | { C: string } | { D: string }
 
 export interface MCQQuestion {
   id: number

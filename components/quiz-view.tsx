@@ -23,10 +23,10 @@ export function QuizView({
   const answeredCount = Object.keys(answers).length
   const totalCount = questions.length
   const allAnswered = answeredCount === totalCount
-
+ 
   return (
     <div className="flex flex-col gap-8 w-full max-w-2xl mx-auto">
-      <div className="flex flex-col gap-4">
+      <div className="sticky top-0 bg-white rounded-md p-4 z-10 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold tracking-tight text-foreground">
             Your Quiz
@@ -46,6 +46,7 @@ export function QuizView({
             index={index}
             selectedAnswer={answers[question.id]}
             onAnswerChange={onAnswerChange}
+            showExplanation={false}
           />
         ))}
       </div>

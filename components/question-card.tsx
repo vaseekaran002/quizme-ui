@@ -10,6 +10,7 @@ interface QuestionCardProps {
   index: number
   selectedAnswer: string | undefined
   onAnswerChange: (questionId: number, answer: string) => void
+  showExplanation?: boolean
 }
 
 export function QuestionCard({
@@ -17,7 +18,11 @@ export function QuestionCard({
   index,
   selectedAnswer,
   onAnswerChange,
+  showExplanation = true,
 }: QuestionCardProps) {
+  // The payload options are an array of strings, not objects
+  // correct_answer is a letter (A, B, C, D)
+  const optionLabels = ["A", "B", "C", "D"];
   return (
     <div className="rounded-xl border bg-card p-6 flex flex-col gap-5">
       <div className="flex items-start gap-3">
@@ -34,30 +39,50 @@ export function QuestionCard({
         onValueChange={(value) => onAnswerChange(question.id, value)}
         className="flex flex-col gap-2 pl-11"
       >
-        {question.options.map((option) => (
-          <Label
-            key={option.label}
-            htmlFor={`q${question.id}-${option.label}`}
+        {question.options.map((option, i) => {
+          const label = optionLabels[i];
+          return (
+            <Label
+              key={label}
+              htmlFor={`q${question.id}-${label}`}
+              className={cn(
+                "flex items-center gap-3 rounded-lg border px-4 py-3 cursor-pointer transition-colors",
+                selectedAnswer === label
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-primary/30 hover:bg-accent",
+              )}
+            >
+              <RadioGroupItem
+                value={label}
+                id={`q${question.id}-${label}`}
+              />
+              <span className="text-sm text-foreground">
+                <span className="font-medium text-muted-foreground mr-1.5">
+                  {label}.
+                </span>
+                {(option as Record<string, string>)[label]}
+              </span>
+            </Label>
+          );
+        })}
+      </RadioGroup>
+      {showExplanation && selectedAnswer && (
+        <div className="mt-4 pl-11">
+          <div
             className={cn(
-              "flex items-center gap-3 rounded-lg border px-4 py-3 cursor-pointer transition-colors",
-              selectedAnswer === option.label
-                ? "border-primary bg-primary/5"
-                : "border-border hover:border-primary/30 hover:bg-accent",
+              "text-sm rounded-lg px-4 py-3",
+              selectedAnswer === question.correct_answer
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
             )}
           >
-            <RadioGroupItem
-              value={option.label}
-              id={`q${question.id}-${option.label}`}
-            />
-            <span className="text-sm text-foreground">
-              <span className="font-medium text-muted-foreground mr-1.5">
-                {option.label}.
-              </span>
-              {option.text}
-            </span>
-          </Label>
-        ))}
-      </RadioGroup>
+            {selectedAnswer === question.correct_answer ? "Correct!" : "Incorrect."}
+            {question.explanation && (
+              <span className="block mt-1 text-foreground">{question.explanation}</span>
+            )}
+          </div>
+        </div>
+      )}
     </div>
-  )
+  );
 }
